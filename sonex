@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Configuration
+VENV_PATH="/usr/local/sonex/myenv"
+INSTALL_DIR="/usr/local/sonex"
+CONFIG_FILE="$INSTALL_DIR/camera_organizer_config.ini"
+
+# Function to log messages
+log() {
+    echo "$(date +"%Y-%m-%d %T") - $1"
+}
+
+# 1. Check if virtual environment exists
+if [ ! -d "$VENV_PATH" ]; then
+    log "Virtual environment not found at $VENV_PATH"
+    log "Please run install.sh first"
+    exit 1
+fi
+
+# 2. Activate virtual environment
+log "Activating virtual environment..."
+source "$VENV_PATH/bin/activate" || {
+    log "Failed to activate virtual environment"
+    exit 1
+}
+log "Virtual environment activated"
+
+# 3. Check and install dependencies
+log "Checking for required Python packages..."
+PACKAGES=("tqdm" "PyQt5" "ffmpeg-python")
+
+for pkg in "${PACKAGES[@]}"; do
+    if python3 -c "import $pkg" 2>/dev/null; then
+        log "$pkg is already installed"
+    else
+        log "$pkg not found. Installing..."
+        pip install "$pkg" || {
+            log "Failed to install $pkg"
+            exit 1
+        }
+        log "$pkg installed successfully"
+    fi
+done
+
+# 4. Run gui.py
+log "Running gui.py..."
+cd "$INSTALL_DIR" || {
+    log "Failed to change to installation directory"
+    exit 1
+}
+
+# Ensure config file exists (create if it doesn't) and is writable
+if [ ! -f "$CONFIG_FILE" ]; then
+    log "Config file not found. Creating default config..."
+    touch "$CONFIG_FILE" || {
+        log "Failed to create config file"
+        exit 1
+    }
+fi
+
+python3 gui.py || {
+    log "Failed to run gui.py"
+    exit 1
+}
+log "gui.py executed successfully"
