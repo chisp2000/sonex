@@ -1,2 +1,3 @@
 # sonex
-Playmemories Home Script for Exporting Media from Sony Cameras
+Playmemories Home Script for Exporting Media from Sony Cameras for Linux
+
